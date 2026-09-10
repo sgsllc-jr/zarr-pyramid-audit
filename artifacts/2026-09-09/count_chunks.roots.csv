@@ -1,0 +1,10 @@
+root,levels_counted,present_chunks,grid_chunks,stored_bytes,stored_gb,recoverable_gb_zstd3,basis
+full-scrolls/Scroll5/PHerc172.volpkg/volumes_zarr/20241024131838.zarr,5,92839,92839,389394989056,389.395,8.099,exact
+community-uploads/bruniss/labels/surfaces/archive/1-voxel-sheet_slices-closed.zarr,5,0,65072,0,0.0,0.0,
+community-uploads/bruniss/scrolls/s1/surfaces/full_scroll/mask-2ext-surface-evenmore_ome.zarr,5,8580,65072,17993564160,17.994,15.534,exact
+community-uploads/bruniss/scrolls/s1/surfaces/full_scroll/mask-2ext-surface_erode_evenmore_ome.zarr,5,8531,65072,17890803712,17.891,15.822,exact
+community-uploads/bruniss/scrolls/s1/fibers_3d/gp_only/old/mask-fiber-only_ome.zarr,5,8888,65072,18639486976,18.639,17.097,exact
+community-uploads/bruniss/scrolls/s1/fibers_3d/gp_only/old/mask-hz-only_ome.zarr,5,8806,65072,18467520512,18.468,17.745,exact
+community-uploads/bruniss/scrolls/s1/surfaces/gp_only/old/mask-2ext-surface-erode_ome.zarr,5,8679,65072,18201182208,18.201,17.257,exact
+community-uploads/bruniss/scrolls/s1/surfaces/gp_only/old/mask-2ext-surface_ome.zarr,5,8871,65072,18603835392,18.604,16.045,exact
+community-uploads/bruniss/scrolls/s1/surfaces/gp_only/old/surface2xt-updated_ome.zarr,5,8603,65072,18041798656,18.042,15.686,exact

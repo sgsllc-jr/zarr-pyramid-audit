@@ -1,0 +1,56 @@
+{
+  "run_name": "count_chunks",
+  "started_utc": "2026-09-09T11:28:59.753521+00:00",
+  "argv": [
+    "bin/count_chunks.py",
+    "--base",
+    "https://dl.ash2txt.org/",
+    "--from-findings",
+    "tmp/audit_pyramid.findings.csv",
+    "--code",
+    "COMPRESSOR_DRIFT",
+    "--max-rps",
+    "30",
+    "--workers",
+    "16",
+    "--head-sample",
+    "40",
+    "--compress-sample",
+    "6",
+    "--timeout",
+    "120"
+  ],
+  "cwd": "/home/jryan/coding/challenges",
+  "host": "Dell-16in-i9",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "python_exe": "/home/jryan/coding/challenges/.venv/bin/python",
+  "packages": {
+    "numpy": "2.5.3",
+    "zarr": "3.3.0",
+    "s3fs": "2026.7.0",
+    "fsspec": "2026.7.0",
+    "tifffile": "2026.8.23",
+    "requests": "2.34.2",
+    "botocore": "1.43.75"
+  },
+  "counters": {
+    "levels_measured": 45,
+    "roots_measured": 9
+  },
+  "outputs": [
+    {
+      "path": "/home/jryan/coding/challenges/tmp/count_chunks.summary.json",
+      "exists": true,
+      "bytes": 108,
+      "desc": "corpus totals"
+    }
+  ],
+  "notes": [],
+  "roots": 9,
+  "stored_bytes": 517233180672,
+  "stored_gb": 517.233,
+  "recoverable_gb_zstd3": 123.285,
+  "ended_utc": "2026-09-09T11:42:34.305002+00:00",
+  "wall_seconds": 814.552
+}

@@ -1,0 +1,190 @@
+# zarr-pyramid-audit
+
+Read-only integrity auditing for OME-Zarr multiscale pyramids served over HTTP or S3.
+
+Built to audit [`dl.ash2txt.org`](https://dl.ash2txt.org/) (the Vesuvius Challenge / Scroll Prize
+data host), but nothing in it is Vesuvius-specific: point `--base` at any store that exposes a
+directory autoindex and it works.
+
+## The failure class this exists to find
+
+Every consumer that is not doing full-resolution work reads a **reduced** level. Viewers navigate at
+level 3–5, registration and QC run at level 2, and several published models train on a specific
+level. A pyramid level that is absent, mis-declared, or generated with a different convention from
+its siblings **does not raise an error anywhere** — it returns plausible-looking voxels.
+
+That is the entire point. These defects are invisible to the tools people actually use:
+
+- A level declared in `multiscales` but missing from the server → 404, or silently `fill_value`.
+- A level with a valid `.zarray` **and no chunks at all** → reads return `fill_value` everywhere,
+  no error, no warning, no way to tell it from real data without counting keys.
+- A `scale` transform that contradicts the array's own shapes → coordinates off by 32× on one axis.
+- Chunk files with no header → undecodable, but the directory looks populated.
+
+Checks are **header-only by default**: a pyramid is judged from its `.zattrs` plus one `.zarray` per
+level — a few KB regardless of array size — so a whole corpus can be audited without downloading it.
+
+## Design notes worth knowing
+
+**It does not depend on `zarr`.** Headers are parsed directly from `.zattrs` / `.zarray` /
+`zarr.json`. This is deliberate: a store that `zarr.open()` refuses to open is exactly the kind of
+defect the tool needs to *report*, not crash on.
+
+**Absence is only ever inferred from positive evidence.** The chunk-presence check
+(`LEVEL_NO_CHUNKS`) trusts a directory listing to prove a level is empty *only* if that listing
+demonstrably shows a file already known to exist (the header just read). On a store with no
+autoindex, or with dotfiles hidden, the result degrades to `unknown` and **no finding is emitted**.
+A tri-state (`True` / `False` / `None`), never a boolean. This is what keeps the check portable to
+the S3 mirror instead of flagging every level there.
+
+**Read-only by construction.** The HTTP store class has no write path.
+
+**Reproducible.** Every run writes a manifest with argv, cwd, host, platform, interpreter, package
+versions, counters, and output inventory. Outputs are never silently overwritten — an existing file
+is backed up to `<name>.<timestamp>.bak` first, so a partial rerun can never be mistaken for a
+complete one.
+
+**Severity is honest.** `info` codes describe what a node *is* (a bare array, a non-multiscale
+group) and are never counted as defects.
+
+## Tools
+
+| tool | what it does | cost |
+|---|---|---|
+| `bin/discover_zarr.py` | Crawls a store's autoindex and finds every Zarr root. Prunes chunk trees, `.tifxyz` leaves, coordinate and segment directories — but runs a Zarr-header test *before* every prune rule, so a heuristic can never discard a real root. | listings only |
+| `bin/audit_pyramid.py` | 21 check codes across the roots found above. Header-only unless `--no-chunk-presence` is off (it is on by default, adding one listing per present level). | ~KB per pyramid |
+| `bin/count_chunks.py` | For a shortlist of roots: counts chunks actually present per level, `HEAD`s a sample to get stored bytes, and re-encodes a sample locally to measure a real compression ratio. Reports whether stored size is `exact` (all samples full-size) or extrapolated. | HEADs + small GETs |
+
+### Check codes
+
+```
+NOT_A_ZARR_GROUP          [info] no .zgroup/zarr.json and nothing Zarr-like inside
+BARE_ARRAY                [info] valid single-scale Zarr array; not a pyramid
+NOT_MULTISCALE            [info] valid Zarr group, but not an OME pyramid
+CHUNK_EXCEEDS_SHAPE       [info] chunk larger than the level itself on every axis
+HEADERLESS_CHUNK_STORE    chunk keys present but no header -- undecodable
+CONTAINER_NO_GROUP_HEADER children are Zarr nodes but root has no group header
+EMPTY_ZARR_DIR            *.zarr directory with no contents
+MULTISCALE_EMPTY          declares multiscales but yields no usable datasets
+LEVEL_MISSING             declared level has no readable array header
+LEVEL_NO_CHUNKS           valid header, zero chunk keys -- reads return fill_value silently
+LEVEL_UNDECLARED          numeric level directory exists but is not declared
+SCALE_NONMONOTONIC        declared scales do not strictly increase with depth
+SCALE_SHAPE_MISMATCH      shape matches neither ceil nor floor of base/factor
+MIXED_ROUNDING            ceil at some levels, floor at others
+DTYPE_DRIFT / FILL_DRIFT / COMPRESSOR_DRIFT / SEPARATOR_DRIFT / NDIM_DRIFT
+AXES_MISMATCH             declared axes count != array ndim
+DEGENERATE_LEVEL          a level has a zero/negative extent
+```
+
+## Usage
+
+```bash
+python -m venv .venv && ./.venv/bin/pip install -r requirements.txt
+```
+
+```bash
+./.venv/bin/python bin/discover_zarr.py --base https://dl.ash2txt.org/ --out-dir tmp
+```
+
+```bash
+./.venv/bin/python bin/audit_pyramid.py --base https://dl.ash2txt.org/ --roots tmp/discover_zarr.roots.jsonl --max-rps 25 --out-dir tmp
+```
+
+```bash
+./.venv/bin/python bin/count_chunks.py --base https://dl.ash2txt.org/ --roots-csv shortlist.csv --out-dir tmp
+```
+
+Outputs land in `--out-dir`: `*.findings.csv` (the reviewable artifact), `*.levels.jsonl`,
+`*.pyramids.jsonl`, `*.summary.json`, `*.manifest.json`.
+
+## Results on dl.ash2txt.org (run of 2026-09-09)
+
+Full artifacts in [`artifacts/2026-09-09/`](artifacts/2026-09-09/).
+
+Discovery crawled 19,995 directory listings with 0 errors and found **241 Zarr roots**. All 241 were
+audited in 141 seconds.
+
+| | |
+|---|---|
+| pyramids audited | 241 |
+| clean (no finding of any kind) | 111 |
+| with **actionable** defects | **18** |
+| findings: high / low / info | 40 / 10 / 125 |
+
+| code | count | severity | roots |
+|---|---|---|---|
+| `CHUNK_EXCEEDS_SHAPE` | 78 | info (triaged benign) | — |
+| `BARE_ARRAY` | 40 | info | — |
+| `SCALE_SHAPE_MISMATCH` | 15 | high | 3 |
+| `LEVEL_MISSING` | 13 | high | 3 |
+| `LEVEL_NO_CHUNKS` | 11 | high | 2 |
+| `COMPRESSOR_DRIFT` | 9 | low | 9 |
+| `NOT_MULTISCALE` | 6 | info | — |
+| `HEADERLESS_CHUNK_STORE` | 1 | high | 1 |
+| `CONTAINER_NO_GROUP_HEADER` | 1 | low | 1 |
+| `NOT_A_ZARR_GROUP` | 1 | info | — |
+
+**Cross-validation.** 64 of the 241 roots mirror the 64 volumes on `s3://vesuvius-challenge-open-data`,
+which already has an independent auditor
+([Bullo27/scroll-data-audit](https://github.com/Bullo27/scroll-data-audit)). This tool reports
+**0 defects** on all 64 — the same verdict, reached with a different codebase and a different
+transport. Every defect found is in the 177 roots that tool does not cover.
+
+**Also clean across all 241:** no dtype drift, ndim drift, fill-value drift, `dimension_separator`
+drift, non-monotonic scales, mixed ceil/floor rounding, or undeclared level directories.
+
+### The sharpest single finding
+
+`other/dev/inked_zarrs/3336_predictions.zarr` declares a 6-level pyramid, has a valid `.zarray` at
+**all six** levels, and contains **zero chunk files at every one of them**. `fill_value` is `0`, so
+`zarr.open()` succeeds and every read returns zeros — with no error, at any level, ever.
+
+```bash
+B=https://dl.ash2txt.org/other/dev/inked_zarrs/3336_predictions.zarr
+for l in 0 1 2 3 4 5; do printf "L$l .zarray="; curl -s -o /dev/null -w "%{http_code}" $B/$l/.zarray; printf "  chunks="; curl -s $B/$l/ | grep -c 'href="[^.]'; done
+```
+
+## Accuracy policy
+
+Every actionable finding was re-verified with `curl` against the live server, independent of the
+tool, before being reported. Storage figures from `count_chunks.py` distinguish **measured** from
+**modelled**: each level records whether its stored-bytes figure is `exact` (every sampled chunk was
+full size) or extrapolated, and compression ratios derived from small samples are reported as
+order-of-magnitude with their sample size, not to spurious precision.
+
+## Data attribution and license
+
+Every finding in this repository was derived from metadata (`.zattrs`, `.zarray`, `.zgroup`, and
+directory listings) served publicly by the Vesuvius Challenge at `dl.ash2txt.org`. No dataset files
+are redistributed here; the committed artifacts are the auditor's own derived JSON/CSV output.
+
+The underlying data is released under [CC-BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/)
+unless otherwise noted for specific assets, and comes from two datasets that must be cited separately
+(see [scrollprize.org/data](https://scrollprize.org/data)):
+
+- **Vesuvius Challenge - CT Scans of Herculaneum Papyri** (newer scans released directly by
+  Vesuvius Challenge, including Scroll 5 and the `other/` community uploads audited here):
+
+  > Giorgio Angelotti, Stephen Parsons, Sean Johnson, Elian Rafael Dal Prà, Johannes Rudolph,
+  > Paul Tafforeau, Alessandro Mirone, Paul Henderson, Hendrik Schilling, Forrest McDonald,
+  > David Josey, Youssef Nader, C. Seth Parker, W. Brent Seales. *Vesuvius Challenge - CT Scans of
+  > Herculaneum Papyri*. Vesuvius Challenge.
+
+- **EduceLab-Scrolls** (Scrolls 1-4 and Fragments 1-6 scanned at DLS before 2025 — this covers the
+  Frag3 finding). Copyright EduceLab / The University of Kentucky:
+
+  > Parsons, S., Parker, C. S., Chapman, C., Hayashida, M., & Seales, W. B. (2023).
+  > *EduceLab-Scrolls: Verifiable Recovery of Text from Herculaneum Papyri using X-ray CT*.
+  > arXiv [cs.CV]. https://doi.org/10.48550/arXiv.2304.02084
+
+  Data used in the preparation of this work were obtained from the EduceLab-Scrolls dataset.
+
+The auditor code itself is MIT-licensed (see `LICENSE`); that license covers the tooling only, not
+the data it was run against.
+
+## Disclosure
+
+Investigation and tooling were carried out with Claude (Anthropic) under the direction of James Ryan,
+who reviewed each step and approved every run against the public server. All access was read-only and
+rate-limited.

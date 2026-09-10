@@ -1,0 +1,13 @@
+# Runtime dependencies for the zarr-pyramid-audit toolkit.
+#
+# Deliberately minimal. The toolkit does NOT depend on `zarr` itself: it reads
+# .zattrs / .zarray / zarr.json directly over HTTP, so it can audit stores that
+# the zarr library refuses to open -- which is precisely the failure class it
+# exists to find.
+
+requests>=2.31          # HTTP store transport
+numpy>=1.24             # chunk sample analysis (count_chunks.py)
+numcodecs>=0.12         # Blosc round-trip for measured compression ratios
+
+# Optional: only needed for s3:// bases. HTTP(S) bases need nothing extra.
+# s3fs>=2024.1

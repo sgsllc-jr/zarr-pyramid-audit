@@ -1,0 +1,77 @@
+{
+  "run_name": "discover_zarr",
+  "started_utc": "2026-09-08T02:52:56.682788+00:00",
+  "argv": [
+    "bin/discover_zarr.py",
+    "--base",
+    "https://dl.ash2txt.org/",
+    "--prefix",
+    "",
+    "--max-depth",
+    "10",
+    "--max-rps",
+    "25",
+    "--out-dir",
+    "tmp"
+  ],
+  "cwd": "/home/jryan/coding/challenges",
+  "host": "Dell-16in-i9",
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3",
+  "python_exe": "/home/jryan/coding/challenges/.venv/bin/python",
+  "packages": {
+    "numpy": "2.5.3",
+    "zarr": "3.3.0",
+    "s3fs": "2026.7.0",
+    "fsspec": "2026.7.0",
+    "tifffile": "2026.8.23",
+    "requests": "2.34.2",
+    "botocore": "1.43.75"
+  },
+  "counters": {
+    "dirs_listed": 19995,
+    "zarr_roots": 241,
+    "pruned_coordinate_dir": 7891,
+    "pruned_skip_name": 20,
+    "pruned_segment_dir": 36,
+    "pruned_leaf_format": 84319,
+    "depth_capped": 4
+  },
+  "outputs": [
+    {
+      "path": "tmp/discover_zarr.roots.jsonl",
+      "exists": true,
+      "bytes": 28598,
+      "desc": "one record per Zarr root"
+    },
+    {
+      "path": "tmp/discover_zarr.dirs.jsonl",
+      "exists": true,
+      "bytes": 3513489,
+      "desc": "one record per directory listed"
+    }
+  ],
+  "notes": [],
+  "base": "https://dl.ash2txt.org/",
+  "prefix": "",
+  "max_depth": 10,
+  "crawl_segments": false,
+  "skip_names": [
+    ".git",
+    ".github",
+    ".ipynb_checkpoints",
+    "__pycache__",
+    "logs",
+    "node_modules",
+    "old_files",
+    "thaumato_outputs",
+    "working"
+  ],
+  "leaf_dir_suffixes": [
+    ".tifxyz"
+  ],
+  "crawl_leaf_formats": false,
+  "zarr_roots_found": 241,
+  "ended_utc": "2026-09-08T03:05:51.783086+00:00",
+  "wall_seconds": 775.1
+}
