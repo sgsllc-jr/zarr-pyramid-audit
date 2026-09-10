@@ -1,4 +1,4 @@
-<!-- Target: https://github.com/ScrollPrize/villa/issues/new  |  Labels: none  |  Status: DRAFT, not filed -->
+<!-- Filed: https://github.com/ScrollPrize/villa/issues/1757  |  Labels: none  |  Status: FILED 2026-09-10 as #1757 -->
 
 # Scroll 5 volume `20241024131838.zarr`: levels 1–5 are stored uncompressed (`compressor: null`, 389 GB) while level 0 is `blosc/zstd` — the same L0-compressed / L1+-null signature appears in 8 community pyramids
 

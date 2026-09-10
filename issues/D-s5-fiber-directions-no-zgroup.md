@@ -1,4 +1,4 @@
-<!-- Target: https://github.com/ScrollPrize/villa/issues/new  |  Labels: none  |  Status: DRAFT, not filed -->
+<!-- Filed: https://github.com/ScrollPrize/villa/issues/1758  |  Labels: none  |  Status: FILED 2026-09-10 as #1758 -->
 
 # `s5-fiber-directions.zarr` has no root `.zgroup`/`.zattrs`, so the `.zarr` path cannot be opened as a group even though `horizontal/` and `vertical/` inside it are valid
 

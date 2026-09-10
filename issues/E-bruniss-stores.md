@@ -1,4 +1,4 @@
-<!-- Target: https://github.com/ScrollPrize/villa/issues/new  |  Labels: none  |  Status: DRAFT, not filed  |  @mention: @bruniss -->
+<!-- Filed: https://github.com/ScrollPrize/villa/issues/1759  |  Labels: none  |  Status: FILED 2026-09-10 as #1759  |  @mention: @bruniss -->
 
 # `community-uploads/bruniss`: one undecodable store (48k chunks, no `.zarray`), one pyramid whose levels 1–5 are header-only, and a stray partial copy of `s5/surfaces/090.zarr` at the parent level
 

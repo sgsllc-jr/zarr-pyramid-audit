@@ -1,4 +1,4 @@
-<!-- Target: https://github.com/ScrollPrize/villa/issues/new  |  Labels: none  |  Status: DRAFT, not filed -->
+<!-- Filed: https://github.com/ScrollPrize/villa/issues/1756  |  Labels: none  |  Status: FILED 2026-09-10 as #1756 -->
 
 # `other/dev/inked_zarrs`: `3336_predictions.zarr` has headers at all 6 levels but zero chunks; `3336_predictions{9,10,11}.zarr` declare `scale` vectors that contradict their own shapes
 

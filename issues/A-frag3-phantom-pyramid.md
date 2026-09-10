@@ -1,4 +1,4 @@
-<!-- Target: https://github.com/ScrollPrize/villa/issues/new  |  Labels: none  |  Status: DRAFT, not filed -->
+<!-- Filed: https://github.com/ScrollPrize/villa/issues/1755  |  Labels: none  |  Status: FILED 2026-09-10 as #1755 -->
 
 # Frag3 88 keV volumes declare a 6-level pyramid but only level 0 exists (both `volumes_zarr` and `volumes_standardized`)
 
