@@ -9,7 +9,7 @@
 **Using:**
 - [`zarr-pyramid-audit`](https://github.com/sgsllc-jr/zarr-pyramid-audit) @ `b3b258b` (MIT): `bin/discover_zarr.py` → `bin/audit_pyramid.py` → `bin/count_chunks.py`; Python 3.12, zarr 3.3.0, requests
 - Data: everything Zarr-shaped under `https://dl.ash2txt.org/`, run 2026-09-09 18:48–18:50 UTC
-- Commands: `python bin/discover_zarr.py --base https://dl.ash2txt.org/` then `python bin/audit_pyramid.py --base https://dl.ash2txt.org/ --roots discover_zarr.roots.jsonl --max-rps 25`
+- Commands: `python bin/discover_zarr.py --base https://dl.ash2txt.org/ --max-depth 10` then `python bin/audit_pyramid.py --base https://dl.ash2txt.org/ --roots discover_zarr.roots.jsonl --max-rps 25`
 
 **What happened:**
 
@@ -44,9 +44,11 @@ Full artifacts of the run — per-level records, per-pyramid records, findings C
 
 Re-running the corpus audit yourself:
 ```
-git clone https://github.com/sgsllc-jr/zarr-pyramid-audit && cd zarr-pyramid-audit && python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt && python bin/discover_zarr.py --base https://dl.ash2txt.org/ --out-dir tmp && python bin/audit_pyramid.py --base https://dl.ash2txt.org/ --roots tmp/discover_zarr.roots.jsonl --max-rps 25 --out-dir tmp
+git clone https://github.com/sgsllc-jr/zarr-pyramid-audit && cd zarr-pyramid-audit && python -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt && python bin/discover_zarr.py --base https://dl.ash2txt.org/ --max-depth 10 --out-dir tmp && python bin/audit_pyramid.py --base https://dl.ash2txt.org/ --roots tmp/discover_zarr.roots.jsonl --max-rps 25 --out-dir tmp
 ```
 (~13 min for discovery, ~2.5 min for the audit, rate-limited to 25 req/s.)
+
+**Independent reproduction (2026-09-10).** A second run from a fresh clone in a separate venv reproduced `LEVEL_MISSING` 13, `LEVEL_NO_CHUNKS` 11, `SCALE_SHAPE_MISMATCH` 15 and `CONTAINER_NO_GROUP_HEADER` 1 exactly. That run used the script's default `--max-depth 6`, which does not reach the 20 roots that sit 7–8 path segments deep (19 under `community-uploads/bruniss/scrolls/s1/…`, 1 under `Scroll5/…/representations/predictions/fibers/`), so it found 229 roots and only 2 of the 9 `COMPRESSOR_DRIFT` hits; the 20 omitted roots were confirmed live by direct request afterwards. The commands above pin `--max-depth 10` for that reason. The same run also surfaced 8 roots under `community-uploads/forrest/tsm/PHerc1667/` that did not exist on 2026-09-09 — see the zarr v3 limitation below.
 
 - [x] I personally encountered or reproduced this using the version and data stated above.
 
@@ -64,6 +66,7 @@ git clone https://github.com/sgsllc-jr/zarr-pyramid-audit && cd zarr-pyramid-aud
 
 - The open-data S3 bucket. 64 of the 241 roots mirror the 64 volumes there; the audit was run against `dl.ash2txt.org` only. S3 listing is a natural extension (the chunk-presence tri-state was designed for it) but is not exercised in the committed artifacts.
 - Chunk *content*. Nothing here decodes voxels; a level whose chunks exist but are corrupt would pass.
+- Zarr **v3** (`zarr.json`) stores. The auditor reads v2 headers only; a v3 root is reported as `NOT_A_ZARR_GROUP` (severity `info`, not counted as a defect) and its pyramid is not checked. Eight such roots now exist under `community-uploads/forrest/tsm/PHerc1667/`. v3 support is the obvious next step for anything used as a publish gate.
 
 **Related**
 - #1643 (uncompressed Kaggle labels), #1649, #1652 — same genre of "published data doesn't match its own manifest", found by hand. A gate would have caught A, B, C, D of this set mechanically at publish time.
