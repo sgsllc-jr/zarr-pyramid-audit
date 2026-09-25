@@ -1,0 +1,101 @@
+{
+  "retrieved_at": "2026-09-25T01:28:36.516702+00:00",
+  "responses": {
+    "community-uploads/forrest/tsm/PHerc1667/labels/coarse.zarr/.zgroup": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/labels/coarse.zarr/.zgroup",
+      "status": 404,
+      "body": "<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx/1.26.0</center>\r\n</body>\r\n</html>\r\n",
+      "sha256": "ac121bcb304c5fa62ccd86c96327a12ea0a7b9165fc50123ee55a9030ff41000"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/labels/coarse.zarr/zarr.json": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/labels/coarse.zarr/zarr.json",
+      "status": 200,
+      "body": "{\n  \"shape\": [\n    8,\n    64,\n    1024,\n    1024\n  ],\n  \"data_type\": \"uint8\",\n  \"chunk_grid\": {\n    \"name\": \"regular\",\n    \"configuration\": {\n      \"chunk_shape\": [\n        1,\n        128,\n        128,\n        128\n      ]\n    }\n  },\n  \"chunk_key_encoding\": {\n    \"name\": \"default\",\n    \"configuration\": {\n      \"separator\": \"/\"\n    }\n  },\n  \"fill_value\": 0,\n  \"codecs\": [\n    {\n      \"name\": \"bytes\"\n    },\n    {\n      \"name\": \"zstd\",\n      \"configuration\": {\n        \"level\": 0,\n        \"checksum\": false\n      }\n    }\n  ],\n  \"attributes\": {\n    \"channels\": [\n      \"phase_sin\",\n      \"phase_cos\",\n      \"density\",\n      \"nx\",\n      \"ny\",\n      \"nz\",\n      \"conf\",\n      \"valid\"\n    ],\n    \"voxel_um\": 9.596,\n    \"origin_zyx\": [\n      7424,\n      1664,\n      896\n    ],\n    \"scale\": 4.0\n  },\n  \"zarr_format\": 3,\n  \"node_type\": \"array\",\n  \"storage_transformers\": []\n}",
+      "sha256": "075959fa708d0d16d40635819c12945909253f0540a77f68e58f73ada0ab7839"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/labels/fine.zarr/.zgroup": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/labels/fine.zarr/.zgroup",
+      "status": 404,
+      "body": "<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx/1.26.0</center>\r\n</body>\r\n</html>\r\n",
+      "sha256": "ac121bcb304c5fa62ccd86c96327a12ea0a7b9165fc50123ee55a9030ff41000"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/labels/fine.zarr/zarr.json": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/labels/fine.zarr/zarr.json",
+      "status": 200,
+      "body": "{\n  \"shape\": [\n    22,\n    256,\n    4096,\n    4096\n  ],\n  \"data_type\": \"uint8\",\n  \"chunk_grid\": {\n    \"name\": \"regular\",\n    \"configuration\": {\n      \"chunk_shape\": [\n        1,\n        128,\n        128,\n        128\n      ]\n    }\n  },\n  \"chunk_key_encoding\": {\n    \"name\": \"default\",\n    \"configuration\": {\n      \"separator\": \"/\"\n    }\n  },\n  \"fill_value\": 0,\n  \"codecs\": [\n    {\n      \"name\": \"bytes\"\n    },\n    {\n      \"name\": \"zstd\",\n      \"configuration\": {\n        \"level\": 0,\n        \"checksum\": false\n      }\n    }\n  ],\n  \"attributes\": {\n    \"channels\": [\n      \"sdf\",\n      \"sdf_valid\",\n      \"ink\",\n      \"ink_valid\",\n      \"sdf_in\",\n      \"sdf_out\",\n      \"faces_valid\",\n      \"thickness\",\n      \"fiber_vt\",\n      \"fiber_hz\",\n      \"fiber_valid\",\n      \"faces_source\",\n      \"rv_class\",\n      \"hzvt_class\",\n      \"wf_sin\",\n      \"wf_cos\",\n      \"wf_density\",\n      \"wf_nx\",\n      \"wf_ny\",\n      \"wf_nz\",\n      \"wf_conf\",\n      \"wf_valid\"\n    ],\n    \"voxel_um\": 2.399,\n    \"origin_zyx\": [\n      29696,\n      6656,\n      3584\n    ],\n    \"scale\": 1.0\n  },\n  \"zarr_format\": 3,\n  \"node_type\": \"array\",\n  \"storage_transformers\": []\n}",
+      "sha256": "9415b72d900f880d0c2a626cc198993ec7f2a042a63f67e7b1cfa53e8bedd4e5"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/rectoverso/rectoverso.zarr/.zgroup": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/rectoverso/rectoverso.zarr/.zgroup",
+      "status": 404,
+      "body": "<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx/1.26.0</center>\r\n</body>\r\n</html>\r\n",
+      "sha256": "ac121bcb304c5fa62ccd86c96327a12ea0a7b9165fc50123ee55a9030ff41000"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/rectoverso/rectoverso.zarr/zarr.json": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/rectoverso/rectoverso.zarr/zarr.json",
+      "status": 200,
+      "body": "{\n  \"shape\": [\n    2,\n    256,\n    4096,\n    4096\n  ],\n  \"data_type\": \"uint8\",\n  \"chunk_grid\": {\n    \"name\": \"regular\",\n    \"configuration\": {\n      \"chunk_shape\": [\n        1,\n        128,\n        128,\n        128\n      ]\n    }\n  },\n  \"chunk_key_encoding\": {\n    \"name\": \"default\",\n    \"configuration\": {\n      \"separator\": \"/\"\n    }\n  },\n  \"fill_value\": 0,\n  \"codecs\": [\n    {\n      \"name\": \"bytes\"\n    },\n    {\n      \"name\": \"zstd\",\n      \"configuration\": {\n        \"level\": 1,\n        \"checksum\": false\n      }\n    }\n  ],\n  \"attributes\": {\n    \"origin_zyx\": [\n      29696,\n      6656,\n      3584\n    ],\n    \"region\": {\n      \"start_zyx\": [\n        29696,\n        6656,\n        3584\n      ],\n      \"size_zyx\": [\n        256,\n        4096,\n        4096\n      ]\n    },\n    \"channels\": [\n      \"rectoverso\",\n      \"hzvt\"\n    ],\n    \"class_names\": {\n      \"rectoverso\": [\n        \"bg\",\n        \"recto\",\n        \"verso\",\n        \"intersection\"\n      ],\n      \"hzvt\": [\n        \"bg\",\n        \"hz\",\n        \"vt\",\n        \"exclude\"\n      ]\n    },\n    \"sources\": {\n      \"rectoverso\": \"https://dl.ash2txt.org/other/dev/meshes/s4-rectoverso-13032025-ome.zarr\",\n      \"hzvt\": \"https://dl.ash2txt.org/other/dev/meshes/s4-hzvt-13032025-ome.zarr\",\n      \"transform_json\": \"s3://vesuvius-challenge-open-data/PHerc1667/volumes/20251217075048-2.399um-0.2m-78keV-masked.zarr/transform.json\"\n    },\n    \"transform_checksum\": \"eb9ac2d3134134f3\",\n    \"transform_fixed_volume\": \"PHerc1667-20231117161658_masked\",\n    \"materialised_z\": [\n      0,\n      256\n    ],\n    \"voxel_um\": 2.399\n  },\n  \"zarr_format\": 3,\n  \"node_type\": \"array\",\n  \"storage_transformers\": []\n}",
+      "sha256": "cb8a0a9e69e29a4b602b543699d42e2f6daf7e03b003f71fe7642f82b5b05392"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/teachers/fiber.zarr/.zgroup": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/teachers/fiber.zarr/.zgroup",
+      "status": 404,
+      "body": "<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx/1.26.0</center>\r\n</body>\r\n</html>\r\n",
+      "sha256": "ac121bcb304c5fa62ccd86c96327a12ea0a7b9165fc50123ee55a9030ff41000"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/teachers/fiber.zarr/zarr.json": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/teachers/fiber.zarr/zarr.json",
+      "status": 200,
+      "body": "{\n  \"shape\": [\n    4,\n    256,\n    4096,\n    4096\n  ],\n  \"data_type\": \"uint8\",\n  \"chunk_grid\": {\n    \"name\": \"regular\",\n    \"configuration\": {\n      \"chunk_shape\": [\n        1,\n        128,\n        128,\n        128\n      ]\n    }\n  },\n  \"chunk_key_encoding\": {\n    \"name\": \"default\",\n    \"configuration\": {\n      \"separator\": \"/\"\n    }\n  },\n  \"fill_value\": 0,\n  \"codecs\": [\n    {\n      \"name\": \"bytes\"\n    },\n    {\n      \"name\": \"zstd\",\n      \"configuration\": {\n        \"level\": 0,\n        \"checksum\": false\n      }\n    }\n  ],\n  \"attributes\": {\n    \"channels\": [\n      \"fiber_bg\",\n      \"fiber_vt\",\n      \"fiber_hz\",\n      \"fiber_ink\"\n    ],\n    \"voxel_um\": 2.4,\n    \"origin_zyx\": [\n      29696,\n      6656,\n      3584\n    ],\n    \"scale\": 1.0\n  },\n  \"zarr_format\": 3,\n  \"node_type\": \"array\",\n  \"storage_transformers\": []\n}",
+      "sha256": "c6f5cd399dbbf80a980f1ed1bcb321f4896cef26ed49894cfe8d407b8e1e9ad8"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/teachers/ink.zarr/.zgroup": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/teachers/ink.zarr/.zgroup",
+      "status": 404,
+      "body": "<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx/1.26.0</center>\r\n</body>\r\n</html>\r\n",
+      "sha256": "ac121bcb304c5fa62ccd86c96327a12ea0a7b9165fc50123ee55a9030ff41000"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/teachers/ink.zarr/zarr.json": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/teachers/ink.zarr/zarr.json",
+      "status": 200,
+      "body": "{\n  \"shape\": [\n    1,\n    256,\n    4096,\n    4096\n  ],\n  \"data_type\": \"uint8\",\n  \"chunk_grid\": {\n    \"name\": \"regular\",\n    \"configuration\": {\n      \"chunk_shape\": [\n        1,\n        128,\n        128,\n        128\n      ]\n    }\n  },\n  \"chunk_key_encoding\": {\n    \"name\": \"default\",\n    \"configuration\": {\n      \"separator\": \"/\"\n    }\n  },\n  \"fill_value\": 0,\n  \"codecs\": [\n    {\n      \"name\": \"bytes\"\n    },\n    {\n      \"name\": \"zstd\",\n      \"configuration\": {\n        \"level\": 0,\n        \"checksum\": false\n      }\n    }\n  ],\n  \"attributes\": {\n    \"channels\": [\n      \"ink\"\n    ],\n    \"voxel_um\": 2.4,\n    \"origin_zyx\": [\n      29696,\n      6656,\n      3584\n    ],\n    \"scale\": 1.0\n  },\n  \"zarr_format\": 3,\n  \"node_type\": \"array\",\n  \"storage_transformers\": []\n}",
+      "sha256": "809339b2eb9e84bb43a713f3b21ecd6d4ae443d03dc24cf75444138d5fa977f3"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/teachers/lasagna.zarr/.zgroup": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/teachers/lasagna.zarr/.zgroup",
+      "status": 404,
+      "body": "<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx/1.26.0</center>\r\n</body>\r\n</html>\r\n",
+      "sha256": "ac121bcb304c5fa62ccd86c96327a12ea0a7b9165fc50123ee55a9030ff41000"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/teachers/lasagna.zarr/zarr.json": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/teachers/lasagna.zarr/zarr.json",
+      "status": 200,
+      "body": "{\n  \"shape\": [\n    8,\n    64,\n    1024,\n    1024\n  ],\n  \"data_type\": \"uint8\",\n  \"chunk_grid\": {\n    \"name\": \"regular\",\n    \"configuration\": {\n      \"chunk_shape\": [\n        1,\n        128,\n        128,\n        128\n      ]\n    }\n  },\n  \"chunk_key_encoding\": {\n    \"name\": \"default\",\n    \"configuration\": {\n      \"separator\": \"/\"\n    }\n  },\n  \"fill_value\": 0,\n  \"codecs\": [\n    {\n      \"name\": \"bytes\"\n    },\n    {\n      \"name\": \"zstd\",\n      \"configuration\": {\n        \"level\": 0,\n        \"checksum\": false\n      }\n    }\n  ],\n  \"attributes\": {\n    \"channels\": [\n      \"cos\",\n      \"grad_mag\",\n      \"dir0_z\",\n      \"dir1_z\",\n      \"dir0_y\",\n      \"dir1_y\",\n      \"dir0_x\",\n      \"dir1_x\"\n    ],\n    \"voxel_um\": 9.6,\n    \"origin_zyx\": [\n      7424,\n      1664,\n      896\n    ],\n    \"scale\": 4.0\n  },\n  \"zarr_format\": 3,\n  \"node_type\": \"array\",\n  \"storage_transformers\": []\n}",
+      "sha256": "3fb268893a6d898d539b79480e73260704607c9a8e00228faeb175ca6f215bde"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/teachers/m7_l2.zarr/.zgroup": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/teachers/m7_l2.zarr/.zgroup",
+      "status": 404,
+      "body": "<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx/1.26.0</center>\r\n</body>\r\n</html>\r\n",
+      "sha256": "ac121bcb304c5fa62ccd86c96327a12ea0a7b9165fc50123ee55a9030ff41000"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/teachers/m7_l2.zarr/zarr.json": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/teachers/m7_l2.zarr/zarr.json",
+      "status": 200,
+      "body": "{\n  \"shape\": [\n    1,\n    64,\n    1024,\n    1024\n  ],\n  \"data_type\": \"uint8\",\n  \"chunk_grid\": {\n    \"name\": \"regular\",\n    \"configuration\": {\n      \"chunk_shape\": [\n        1,\n        128,\n        128,\n        128\n      ]\n    }\n  },\n  \"chunk_key_encoding\": {\n    \"name\": \"default\",\n    \"configuration\": {\n      \"separator\": \"/\"\n    }\n  },\n  \"fill_value\": 0,\n  \"codecs\": [\n    {\n      \"name\": \"bytes\"\n    },\n    {\n      \"name\": \"zstd\",\n      \"configuration\": {\n        \"level\": 0,\n        \"checksum\": false\n      }\n    }\n  ],\n  \"attributes\": {\n    \"channels\": [\n      \"surface\"\n    ],\n    \"voxel_um\": 9.6,\n    \"origin_zyx\": [\n      7424,\n      1664,\n      896\n    ],\n    \"scale\": 4.0\n  },\n  \"zarr_format\": 3,\n  \"node_type\": \"array\",\n  \"storage_transformers\": []\n}",
+      "sha256": "122a173cd718df09d6c7fafa641032a754ba8d51521818f6d5eec06c921125fd"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/teachers/recto.zarr/.zgroup": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/teachers/recto.zarr/.zgroup",
+      "status": 404,
+      "body": "<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>nginx/1.26.0</center>\r\n</body>\r\n</html>\r\n",
+      "sha256": "ac121bcb304c5fa62ccd86c96327a12ea0a7b9165fc50123ee55a9030ff41000"
+    },
+    "community-uploads/forrest/tsm/PHerc1667/teachers/recto.zarr/zarr.json": {
+      "url": "https://dl.ash2txt.org/community-uploads/forrest/tsm/PHerc1667/teachers/recto.zarr/zarr.json",
+      "status": 200,
+      "body": "{\n  \"shape\": [\n    1,\n    256,\n    4096,\n    4096\n  ],\n  \"data_type\": \"uint8\",\n  \"chunk_grid\": {\n    \"name\": \"regular\",\n    \"configuration\": {\n      \"chunk_shape\": [\n        1,\n        128,\n        128,\n        128\n      ]\n    }\n  },\n  \"chunk_key_encoding\": {\n    \"name\": \"default\",\n    \"configuration\": {\n      \"separator\": \"/\"\n    }\n  },\n  \"fill_value\": 0,\n  \"codecs\": [\n    {\n      \"name\": \"bytes\"\n    },\n    {\n      \"name\": \"zstd\",\n      \"configuration\": {\n        \"level\": 0,\n        \"checksum\": false\n      }\n    }\n  ],\n  \"attributes\": {\n    \"channels\": [\n      \"recto\"\n    ],\n    \"voxel_um\": 2.4,\n    \"origin_zyx\": [\n      29696,\n      6656,\n      3584\n    ],\n    \"scale\": 1.0\n  },\n  \"zarr_format\": 3,\n  \"node_type\": \"array\",\n  \"storage_transformers\": []\n}",
+      "sha256": "08d0fb27693e7b5f69cea16f8aaff399a72784a5eb408cca655a7eb41430479a"
+    }
+  }
+}

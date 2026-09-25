@@ -87,7 +87,19 @@ python -m venv .venv && ./.venv/bin/pip install -r requirements.txt
 ./.venv/bin/python bin/discover_zarr.py --base https://dl.ash2txt.org/ --max-depth 10 --out-dir tmp
 ```
 
-`--max-depth 10` is not optional for this host: the default (6) stops short of the roots under `community-uploads/bruniss/scrolls/s1/…/old/…` and `Scroll5/…/representations/predictions/fibers/`, which sit 7–8 path segments deep (a depth-6 run finds 229 roots instead of 241). Zarr **v3** stores (`zarr.json`) are not yet parsed and are reported as `NOT_A_ZARR_GROUP` (info).
+`--max-depth 10` is not optional for this host: the default (6) stops short of the roots under `community-uploads/bruniss/scrolls/s1/…/old/…` and `Scroll5/…/representations/predictions/fibers/`, which sit 7–8 path segments deep (a depth-6 run finds 229 roots instead of 241). Zarr **v3** group and array headers (`zarr.json`) are parsed. Single-scale v3 arrays are classified as `BARE_ARRAY` (info), just like v2 arrays; they are not multiscale pyramids and their chunk contents are not validated. The historical counts below describe the original run, before this classification fix.
+
+### Bare v3 array regression check
+
+Eight public PHerc1667 teacher/label arrays previously reached the group-only
+metadata path and were classified as `NOT_A_ZARR_GROUP`. Header-only before/after
+evidence and attribution are in [the reproduction report](artifacts/2026-09-25-v3-arrays/README.md).
+Run the tests without network access:
+
+```bash
+python -m unittest discover -s tests -v
+python bin/reproduce_v3_arrays.py --replay artifacts/2026-09-25-v3-arrays/headers.json
+```
 
 ```bash
 ./.venv/bin/python bin/audit_pyramid.py --base https://dl.ash2txt.org/ --roots tmp/discover_zarr.roots.jsonl --max-rps 25 --out-dir tmp

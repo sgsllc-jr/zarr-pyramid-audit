@@ -1,0 +1,11 @@
+test_array_attributes_do_not_turn_an_array_into_a_group (test_zarrmeta.ZarrNodeClassificationTests.test_array_attributes_do_not_turn_an_array_into_a_group) ... ok
+test_real_pherc1667_v3_arrays_are_classified_without_chunk_reads (test_zarrmeta.ZarrNodeClassificationTests.test_real_pherc1667_v3_arrays_are_classified_without_chunk_reads) ... ok
+test_unknown_node_type_is_not_claimed_as_an_array (test_zarrmeta.ZarrNodeClassificationTests.test_unknown_node_type_is_not_claimed_as_an_array) ... ok
+test_v2_bare_array_classification_is_unchanged (test_zarrmeta.ZarrNodeClassificationTests.test_v2_bare_array_classification_is_unchanged) ... ok
+test_v3_non_multiscale_group_is_still_a_group (test_zarrmeta.ZarrNodeClassificationTests.test_v3_non_multiscale_group_is_still_a_group) ... ok
+test_v3_ome_group_still_reads_its_level (test_zarrmeta.ZarrNodeClassificationTests.test_v3_ome_group_still_reads_its_level) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.002s
+
+OK
