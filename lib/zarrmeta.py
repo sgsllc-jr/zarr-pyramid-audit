@@ -17,6 +17,7 @@ import math
 import posixpath
 import re
 from dataclasses import dataclass, field
+from types import SimpleNamespace
 from typing import Any, Sequence
 
 __all__ = ["LevelMeta", "PyramidMeta", "read_pyramid", "chunk_key",
@@ -39,10 +40,14 @@ class LevelMeta:
     order: str | None = None
     present: bool = False
     error: str | None = None
+    evidence_state: str = "UNKNOWN"
+    evidence_reason: str | None = None
     # Chunk presence, from ONE directory listing of the level's top directory.
     # None means "not checked" or "listing unreliable" -- absence of evidence
     # is never reported as absence of chunks.
     has_chunks: bool | None = None
+    chunk_evidence_state: str = "UNKNOWN"
+    chunk_evidence_reason: str | None = None
     top_entries: int | None = None       # non-metadata entries actually listed
     top_entries_max: int | None = None   # what a DENSE level would show
 
@@ -98,9 +103,12 @@ class PyramidMeta:
     is_group: bool = False
     # What a non-group node actually is, so callers can tell a valid bare
     # array from a corrupt chunk store:
-    #   group | array | headerless_chunks | container | empty | not_zarr | unknown
+    #   group | array | headerless_chunks | container | absent | empty |
+    #   not_zarr | unknown
     node_kind: str = "unknown"
     node_detail: str = ""
+    evidence_state: str = "UNKNOWN"
+    evidence_reason: str | None = None
     has_multiscales: bool = False        # datasets list is usable
     multiscales_key_present: bool = False  # key exists, may be empty
     axes: list[str] = field(default_factory=list)
@@ -205,7 +213,48 @@ def _parse_v3_array(j: dict[str, Any]) -> dict[str, Any]:
 _CHUNK_KEY_RE = re.compile(r"^\d+(\.\d+)*$")
 
 
-def _classify_non_group(store, root: str, pm: PyramidMeta) -> None:
+def _json_evidence(store, path: str):
+    """Use the evidence API when available without breaking legacy stores."""
+    method = getattr(store, "json_evidence", None)
+    if callable(method):
+        return method(path)
+    try:
+        value, error = store.try_json(path)
+    except Exception as exc:  # legacy adapters were allowed to raise
+        error = f"{type(exc).__name__}: {exc}"
+        return SimpleNamespace(value=None, state="UNKNOWN",
+                               reason="LEGACY_ACCESS_ERROR", error=error)
+    if value is not None:
+        return SimpleNamespace(value=value, state="PRESENT", reason=None, error=None)
+    text = str(error or "")
+    low = text.lower()
+    if text.startswith("404 Not Found") or "filenotfounderror" in low:
+        state, reason = "ABSENT", "NOT_FOUND"
+    elif ("jsondecodeerror" in low or "invalid json" in low
+          or "expecting value" in low):
+        state, reason = "PRESENT", "METADATA_UNREADABLE"
+    else:
+        state, reason = "UNKNOWN", "LEGACY_ACCESS_ERROR"
+    return SimpleNamespace(value=None, state=state, reason=reason, error=error)
+
+
+def _list_evidence(store, path: str):
+    """Use evidence listings when available and preserve the old store API."""
+    method = getattr(store, "list_dir_evidence", None)
+    if callable(method):
+        return method(path)
+    try:
+        dirs, files = store.list_dir(path)
+    except Exception as exc:  # legacy adapters were allowed to raise
+        error = f"{type(exc).__name__}: {exc}"
+        return SimpleNamespace(dirs=[], files=[], state="UNKNOWN",
+                               reason="LISTING_ERROR", error=error)
+    return SimpleNamespace(dirs=list(dirs), files=list(files),
+                           state="PRESENT", reason=None, error=None)
+
+
+def _classify_non_group(store, root: str, pm: PyramidMeta,
+                        prior_headers=()) -> None:
     """
     A node with no .zgroup/zarr.json is not necessarily broken. Distinguish:
       array             .zarray at root -- a valid single-scale Zarr array
@@ -215,19 +264,47 @@ def _classify_non_group(store, root: str, pm: PyramidMeta) -> None:
       not_zarr          none of the above
     Costs one .zarray probe plus at most one listing and four child probes.
     """
-    za, _ = store.try_json(f"{root}/.zarray")
+    za_result = _json_evidence(store, f"{root}/.zarray")
+    za = za_result.value
     if isinstance(za, dict):
+        pm.evidence_state = "PRESENT"
         pm.node_kind = "array"
         pm.node_detail = (f"bare zarr v2 array shape={za.get('shape')} "
                           f"chunks={za.get('chunks')} dtype={za.get('dtype')}")
         return
-    dirs, files = store.list_dir(root)
+    header_state, header_reason = _failed_json_evidence(
+        *tuple(prior_headers), za_result)
+    if header_state == "PRESENT" and header_reason == "METADATA_UNREADABLE":
+        pm.evidence_state = "PRESENT"
+        pm.evidence_reason = "METADATA_UNREADABLE"
+        pm.node_kind = "unknown"
+        pm.node_detail = "Zarr metadata exists but is unreadable"
+        return
+    listed = _list_evidence(store, root)
+    dirs, files = listed.dirs, listed.files
+    if listed.state == "UNKNOWN":
+        pm.evidence_state = "UNKNOWN"
+        pm.evidence_reason = listed.reason
+        pm.node_kind = "unknown"
+        pm.node_detail = f"directory listing unavailable: {listed.error}"
+        return
+    if header_state == "UNKNOWN":
+        pm.evidence_state = "UNKNOWN"
+        pm.evidence_reason = header_reason
+        pm.node_kind = "unknown"
+        pm.node_detail = "one or more Zarr header probes were inconclusive"
+        return
     if not dirs and not files:
-        pm.node_kind = "empty"
-        pm.node_detail = "directory is empty"
+        pm.evidence_state = "ABSENT"
+        pm.evidence_reason = "EMPTY_STRUCTURE" if listed.state == "PRESENT" else listed.reason
+        pm.node_kind = "empty" if listed.state == "PRESENT" else "absent"
+        pm.node_detail = ("directory listing succeeded and is empty"
+                          if listed.state == "PRESENT"
+                          else "metadata probes and root listing confirm absence")
         return
     chunk_keys = [f for f in files if _CHUNK_KEY_RE.match(f)]
     if chunk_keys and not any(f in (".zarray", ".zgroup", "zarr.json") for f in files):
+        pm.evidence_state = "PRESENT"
         pm.node_kind = "headerless_chunks"
         pm.node_detail = (f"{len(chunk_keys)} chunk-like keys (e.g. {chunk_keys[0]}) "
                           f"but no .zarray/.zgroup/zarr.json -- undecodable")
@@ -235,20 +312,36 @@ def _classify_non_group(store, root: str, pm: PyramidMeta) -> None:
     zarr_children = 0
     for d in dirs[:4]:
         for hdr in (".zgroup", ".zarray", "zarr.json"):
-            j, _ = store.try_json(f"{root}/{d}/{hdr}")
-            if isinstance(j, dict):
+            result = _json_evidence(store, f"{root}/{d}/{hdr}")
+            if isinstance(result.value, dict):
                 zarr_children += 1
                 break
     if zarr_children:
+        pm.evidence_state = "PRESENT"
         pm.node_kind = "container"
         pm.node_detail = (f"{zarr_children}/{min(4, len(dirs))} probed children are Zarr "
                           f"nodes ({dirs[:4]}); no group header at root")
         return
+    pm.evidence_state = "PRESENT"
     pm.node_kind = "not_zarr"
     pm.node_detail = f"{len(dirs)} dirs, {len(files)} files, none Zarr-like"
 
 
 _META_NAMES = frozenset({".zarray", ".zattrs", ".zgroup", ".zmetadata", "zarr.json"})
+
+
+def _failed_json_evidence(*results) -> tuple[str, str | None]:
+    """Combine failed alternative header probes without strengthening evidence."""
+    unreadable = next((r for r in results
+                       if r.state == "PRESENT" and r.reason == "METADATA_UNREADABLE"), None)
+    if unreadable is not None:
+        return "PRESENT", "METADATA_UNREADABLE"
+    if results and all(r.state == "ABSENT" for r in results):
+        return "ABSENT", "NOT_FOUND"
+    unknown = next((r for r in results if r.state == "UNKNOWN"), None)
+    if unknown is not None:
+        return "UNKNOWN", unknown.reason
+    return "UNKNOWN", "METADATA_UNREADABLE"
 
 
 def _probe_chunk_presence(store, apath: str, lm: LevelMeta,
@@ -280,19 +373,38 @@ def _probe_chunk_presence(store, apath: str, lm: LevelMeta,
                 and lm.n_chunks and lm.n_chunks > max_flat_keys):
             return
     try:
-        dirs, files = store.list_dir(apath)
+        listed = _list_evidence(store, apath)
     except Exception as e:  # noqa: BLE001 -- never let a probe sink the level
+        lm.chunk_evidence_state = "UNKNOWN"
+        lm.chunk_evidence_reason = "LISTING_ERROR"
         lm.error = (lm.error + " | " if lm.error else "") + f"list_dir: {e}"
         return
+    if listed.state != "PRESENT":
+        # The array header was read from this same path, so a subsequent
+        # absent listing is contradictory rather than evidence of no chunks.
+        lm.chunk_evidence_state = "UNKNOWN"
+        lm.chunk_evidence_reason = listed.reason
+        lm.error = (lm.error + " | " if lm.error else "") + f"list_dir: {listed.error}"
+        return
+    dirs, files = listed.dirs, listed.files
     entries = list(dirs) + list(files)
     if not entries:
+        lm.chunk_evidence_state = "UNKNOWN"
+        lm.chunk_evidence_reason = "EMPTY_LISTING_UNVERIFIED"
         return
     chunk_entries = [n for n in entries if n not in _META_NAMES]
     lm.top_entries = len(chunk_entries)
     if chunk_entries:
         lm.has_chunks = True
+        lm.chunk_evidence_state = "PRESENT"
+        lm.chunk_evidence_reason = None
     elif any(n in (".zarray", "zarr.json") for n in entries):
         lm.has_chunks = False
+        lm.chunk_evidence_state = "ABSENT"
+        lm.chunk_evidence_reason = "NO_CHUNK_KEYS"
+    else:
+        lm.chunk_evidence_state = "UNKNOWN"
+        lm.chunk_evidence_reason = "LISTING_INCOMPLETE"
 
 
 def read_pyramid(store, root: str, *, probe_extra_levels: int = 3,
@@ -314,25 +426,35 @@ def read_pyramid(store, root: str, *, probe_extra_levels: int = 3,
 
     # ---- group document (v2 .zgroup + .zattrs, or v3 zarr.json) -----------
     attrs: dict[str, Any] = {}
-    zg, e_zg = store.try_json(f"{root}/.zgroup")
+    zg_result = _json_evidence(store, f"{root}/.zgroup")
+    zg, e_zg = zg_result.value, zg_result.error
     if isinstance(zg, dict):
+        pm.evidence_state = "PRESENT"
         pm.is_group = True
         pm.node_kind = "group"
         pm.zarr_format = int(zg.get("zarr_format") or 2)
-        za, e_za = store.try_json(f"{root}/.zattrs")
+        za_result = _json_evidence(store, f"{root}/.zattrs")
+        za, e_za = za_result.value, za_result.error
         if isinstance(za, dict):
             attrs = za
         elif e_za:
             pm.errors.append(f".zattrs unreadable: {e_za}")
+            if za_result.state == "UNKNOWN":
+                pm.evidence_state = "UNKNOWN"
+                pm.evidence_reason = za_result.reason
+            elif za_result.state == "PRESENT":
+                pm.evidence_reason = za_result.reason
     else:
-        z3, e_z3 = store.try_json(f"{root}/zarr.json")
+        z3_result = _json_evidence(store, f"{root}/zarr.json")
+        z3, e_z3 = z3_result.value, z3_result.error
         if isinstance(z3, dict):
+            pm.evidence_state = "PRESENT"
             pm.is_group = (z3.get("node_type") == "group")
             pm.zarr_format = int(z3.get("zarr_format") or 3)
             attrs = z3.get("attributes") or {}
         else:
             pm.errors.append(f"no .zgroup ({e_zg}) and no zarr.json ({e_z3})")
-            _classify_non_group(store, root, pm)
+            _classify_non_group(store, root, pm, (zg_result, z3_result))
             return pm
 
     pm.attrs_raw = attrs
@@ -358,20 +480,26 @@ def read_pyramid(store, root: str, *, probe_extra_levels: int = 3,
         declared_paths.add(p)
         lm = LevelMeta(path=p, index=i, declared_scale=_scale_of(ds))
         apath = posixpath.join(root, p)
-        j, err = store.try_json(f"{apath}/.zarray")
+        j_result = _json_evidence(store, f"{apath}/.zarray")
+        j, err = j_result.value, j_result.error
         if isinstance(j, dict):
             for k, v in _parse_v2_array(j).items():
                 setattr(lm, k, v)
             lm.present = True
+            lm.evidence_state = "PRESENT"
         else:
-            j3, err3 = store.try_json(f"{apath}/zarr.json")
+            j3_result = _json_evidence(store, f"{apath}/zarr.json")
+            j3, err3 = j3_result.value, j3_result.error
             if isinstance(j3, dict):
                 for k, v in _parse_v3_array(j3).items():
                     setattr(lm, k, v)
                 lm.present = True
+                lm.evidence_state = "PRESENT"
             else:
                 lm.present = False
                 lm.error = f".zarray: {err} | zarr.json: {err3}"
+                lm.evidence_state, lm.evidence_reason = _failed_json_evidence(
+                    j_result, j3_result)
         if lm.present and check_chunks:
             _probe_chunk_presence(store, apath, lm, max_flat_keys)
         pm.levels.append(lm)
