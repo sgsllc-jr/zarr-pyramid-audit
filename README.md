@@ -37,6 +37,13 @@ autoindex, or with dotfiles hidden, the result degrades to `unknown` and **no fi
 A tri-state (`True` / `False` / `None`), never a boolean. This is what keeps the check portable to
 the S3 mirror instead of flagging every level there.
 
+Metadata and listing probes use the same evidence contract: `PRESENT` means the object was
+observed, `ABSENT` requires a confirmed negative response, and `UNKNOWN` means the attempted
+access could establish neither. Transport, permission, and service failures therefore never
+become missing/empty findings.
+Pyramid and level records expose this through additive `evidence_state` / `evidence_reason`
+fields; level records also carry `chunk_evidence_state` / `chunk_evidence_reason`.
+
 **Read-only by construction.** The HTTP store class has no write path.
 
 **Reproducible.** Every run writes a manifest with argv, cwd, host, platform, interpreter, package
@@ -64,7 +71,10 @@ NOT_MULTISCALE            [info] valid Zarr group, but not an OME pyramid
 CHUNK_EXCEEDS_SHAPE       [info] chunk larger than the level itself on every axis
 HEADERLESS_CHUNK_STORE    chunk keys present but no header -- undecodable
 CONTAINER_NO_GROUP_HEADER children are Zarr nodes but root has no group header
+ROOT_ABSENT               requested Zarr root is confirmed absent
 EMPTY_ZARR_DIR            *.zarr directory with no contents
+ACCESS_UNKNOWN            [info] access could not establish presence or absence
+METADATA_UNREADABLE       metadata exists but cannot be decoded
 MULTISCALE_EMPTY          declares multiscales but yields no usable datasets
 LEVEL_MISSING             declared level has no readable array header
 LEVEL_NO_CHUNKS           valid header, zero chunk keys -- reads return fill_value silently

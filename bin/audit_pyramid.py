@@ -20,6 +20,8 @@ CHECK CODES
   HEADERLESS_CHUNK_STORE  chunk keys present but no .zarray/.zgroup -- undecodable
   CONTAINER_NO_GROUP_HEADER  children are Zarr nodes but root has no group header;
                     zarr.open() on the *.zarr path fails
+  ACCESS_UNKNOWN     [info] access could not establish presence or absence
+  METADATA_UNREADABLE  metadata exists but cannot be decoded
   ROOT_ABSENT        requested Zarr root is confirmed absent
   EMPTY_ZARR_DIR     *.zarr directory with no contents
   NOT_MULTISCALE     [info] valid Zarr group, but not an OME pyramid
