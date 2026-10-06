@@ -34,6 +34,15 @@ A directory recognised as a Zarr root is recorded and NOT entered. The
 zarr-name test runs BEFORE every prune test, so a Zarr root can never be
 pruned by a naming heuristic.
 
+LISTING EVIDENCE: every listing is classified PRESENT / ABSENT / UNKNOWN via
+the store's list_dir_evidence(). A listing that could not be observed (403,
+429, 5xx, timeout, connection error) is UNKNOWN: it is counted in
+`list_errors`, broken down by reason in `list_unknown_<reason>`, written to
+discover_zarr.dirs.jsonl with its evidence state, and its subtree is reported
+as unverified. It is NEVER treated as an empty directory, so a throttled or
+access-denied prefix cannot silently drop roots out of the crawl. A confirmed
+404 is ABSENT and counted separately in `list_absent`.
+
 Outputs (into --out-dir, existing files backed up, never overwritten):
     discover_zarr.roots.jsonl     one record per Zarr root found
     discover_zarr.dirs.jsonl      one record per directory listed
@@ -172,9 +181,20 @@ def main() -> int:
 
         def visit(task: tuple[str, int]) -> dict:
             path, depth = task
-            subdirs, files = store.list_dir(path)
-            return {"path": path, "depth": depth,
-                    "subdirs": subdirs, "files": files}
+            lister = getattr(store, "list_dir_evidence", None)
+            if lister is None:
+                # Legacy store adapter: no evidence available. Record that
+                # explicitly rather than claiming the listing was verified.
+                subdirs, files = store.list_dir(path)
+                return {"path": path, "depth": depth, "subdirs": subdirs,
+                        "files": files, "state": "PRESENT",
+                        "reason": "LEGACY_STORE_NO_EVIDENCE", "error": None}
+            ev = lister(path)
+            return {"path": path, "depth": depth, "subdirs": ev.dirs,
+                    "files": ev.files, "state": ev.state,
+                    "reason": ev.reason, "error": ev.error}
+
+        unverified: list[dict] = []
 
         frontier: list[tuple[str, int]] = [(args.prefix.strip("/"), 0)]
         with seen_lock:
@@ -186,11 +206,30 @@ def main() -> int:
             for res in parallel_map(visit, batch, workers=args.workers,
                                     label=f"depth {depth}"):
                 if not res.ok:
+                    rec = {"path": res.item[0], "depth": res.item[1],
+                           "evidence_state": "UNKNOWN",
+                           "evidence_reason": "EXCEPTION",
+                           "error": res.error}
                     man.count("list_errors")
-                    w_dirs.write({"path": res.item[0], "depth": res.item[1],
-                                  "error": res.error})
+                    man.count("list_unknown_exception")
+                    w_dirs.write(rec)
+                    unverified.append(rec)
                     continue
                 r = res.value
+                if r["state"] != "PRESENT":
+                    rec = {"path": r["path"], "depth": r["depth"],
+                           "evidence_state": r["state"],
+                           "evidence_reason": r["reason"],
+                           "error": r["error"]}
+                    w_dirs.write(rec)
+                    if r["state"] == "ABSENT":
+                        man.count("list_absent")
+                    else:
+                        man.count("list_errors")
+                        man.count("list_unknown_"
+                                  + (r["reason"] or "UNSPECIFIED").lower())
+                        unverified.append(rec)
+                    continue
                 man.count("dirs_listed")
                 fileset = set(r["files"])
                 here = posixpath.basename(r["path"])
@@ -198,6 +237,8 @@ def main() -> int:
                 self_is_zarr = (".zgroup" in fileset or "zarr.json" in fileset
                                 or looks_like_zarr_name(here))
                 w_dirs.write({"path": r["path"], "depth": r["depth"],
+                              "evidence_state": r["state"],
+                              "evidence_reason": r["reason"],
                               "n_subdirs": len(r["subdirs"]),
                               "n_files": len(r["files"]),
                               "is_zarr_root": self_is_zarr})
@@ -254,11 +295,17 @@ def main() -> int:
 
         c = man.data["counters"]
         man.set("zarr_roots_found", len(roots))
+        man.set("listing_complete", c.get("list_errors", 0) == 0)
+        man.set("unverified_dirs", sorted(u["path"] for u in unverified))
         man.add_output(roots_path, "one record per Zarr root")
         man.add_output(dirs_path, "one record per directory listed")
         print(f"\nzarr roots found     : {len(roots)}")
         print(f"dirs listed          : {c.get('dirs_listed', 0)}")
         print(f"list errors          : {c.get('list_errors', 0)}")
+        for k in sorted(c):
+            if k.startswith("list_unknown_"):
+                print(f"  {k[len('list_unknown_'):]:<19}: {c[k]}")
+        print(f"list absent (404)    : {c.get('list_absent', 0)}")
         print(f"pruned coordinate    : {c.get('pruned_coordinate_dir', 0)}")
         print(f"pruned segment       : {c.get('pruned_segment_dir', 0)}")
         print(f"pruned leaf-format   : {c.get('pruned_leaf_format', 0)}")
@@ -266,6 +313,17 @@ def main() -> int:
         print(f"depth capped         : {c.get('depth_capped', 0)}")
         print(f"roots  -> {roots_path}")
         print(f"dirs   -> {dirs_path}")
+        if unverified:
+            print(f"\nWARNING: {len(unverified)} director"
+                  f"{'y' if len(unverified) == 1 else 'ies'} could not be "
+                  "listed; their subtrees are UNVERIFIED and any Zarr roots "
+                  "inside them are missing from this run:", file=sys.stderr)
+            for u in sorted(unverified, key=lambda x: x["path"])[:20]:
+                print(f"  {u['path'] or '/'}  [{u['evidence_reason']}]",
+                      file=sys.stderr)
+            if len(unverified) > 20:
+                print(f"  ... and {len(unverified) - 20} more "
+                      f"(see {dirs_path})", file=sys.stderr)
     return 0
 
 

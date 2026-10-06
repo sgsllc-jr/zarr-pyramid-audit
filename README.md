@@ -58,7 +58,7 @@ group) and are never counted as defects.
 
 | tool | what it does | cost |
 |---|---|---|
-| `bin/discover_zarr.py` | Crawls a store's autoindex and finds every Zarr root. Prunes chunk trees, `.tifxyz` leaves, coordinate and segment directories — but runs a Zarr-header test *before* every prune rule, so a heuristic can never discard a real root. | listings only |
+| `bin/discover_zarr.py` | Crawls a store's autoindex and finds every Zarr root. Prunes chunk trees, `.tifxyz` leaves, coordinate and segment directories — but runs a Zarr-header test *before* every prune rule, so a heuristic can never discard a real root. A listing that fails (403/429/5xx/timeout) is counted in `list_errors`, recorded as UNKNOWN in `discover_zarr.dirs.jsonl`, and reported as an unverified subtree; it is never treated as an empty directory. | listings only |
 | `bin/audit_pyramid.py` | 21 check codes across the roots found above. Header-only unless `--no-chunk-presence` is off (it is on by default, adding one listing per present level). | ~KB per pyramid |
 | `bin/count_chunks.py` | For a shortlist of roots: counts chunks actually present per level, `HEAD`s a sample to get stored bytes, and re-encodes a sample locally to measure a real compression ratio. Reports whether stored size is `exact` (all samples full-size) or extrapolated. | HEADs + small GETs |
 
