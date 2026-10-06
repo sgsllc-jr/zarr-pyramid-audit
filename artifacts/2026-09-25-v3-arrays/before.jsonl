@@ -1,0 +1,8 @@
+{"codes": ["NOT_A_ZARR_GROUP"], "errors": ["group has no multiscales/datasets"], "format": 3, "levels": 0, "node_kind": "unknown", "root": "community-uploads/forrest/tsm/PHerc1667/labels/coarse.zarr"}
+{"codes": ["NOT_A_ZARR_GROUP"], "errors": ["group has no multiscales/datasets"], "format": 3, "levels": 0, "node_kind": "unknown", "root": "community-uploads/forrest/tsm/PHerc1667/labels/fine.zarr"}
+{"codes": ["NOT_A_ZARR_GROUP"], "errors": ["group has no multiscales/datasets"], "format": 3, "levels": 0, "node_kind": "unknown", "root": "community-uploads/forrest/tsm/PHerc1667/rectoverso/rectoverso.zarr"}
+{"codes": ["NOT_A_ZARR_GROUP"], "errors": ["group has no multiscales/datasets"], "format": 3, "levels": 0, "node_kind": "unknown", "root": "community-uploads/forrest/tsm/PHerc1667/teachers/fiber.zarr"}
+{"codes": ["NOT_A_ZARR_GROUP"], "errors": ["group has no multiscales/datasets"], "format": 3, "levels": 0, "node_kind": "unknown", "root": "community-uploads/forrest/tsm/PHerc1667/teachers/ink.zarr"}
+{"codes": ["NOT_A_ZARR_GROUP"], "errors": ["group has no multiscales/datasets"], "format": 3, "levels": 0, "node_kind": "unknown", "root": "community-uploads/forrest/tsm/PHerc1667/teachers/lasagna.zarr"}
+{"codes": ["NOT_A_ZARR_GROUP"], "errors": ["group has no multiscales/datasets"], "format": 3, "levels": 0, "node_kind": "unknown", "root": "community-uploads/forrest/tsm/PHerc1667/teachers/m7_l2.zarr"}
+{"codes": ["NOT_A_ZARR_GROUP"], "errors": ["group has no multiscales/datasets"], "format": 3, "levels": 0, "node_kind": "unknown", "root": "community-uploads/forrest/tsm/PHerc1667/teachers/recto.zarr"}

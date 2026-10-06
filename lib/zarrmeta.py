@@ -452,6 +452,17 @@ def read_pyramid(store, root: str, *, probe_extra_levels: int = 3,
             pm.is_group = (z3.get("node_type") == "group")
             pm.zarr_format = int(z3.get("zarr_format") or 3)
             attrs = z3.get("attributes") or {}
+            if pm.is_group:
+                pm.node_kind = "group"
+            elif z3.get("node_type") == "array":
+                # v3 arrays share the zarr.json filename with groups. They
+                # are valid single-scale nodes, not groups missing OME data.
+                pm.node_kind = "array"
+                pm.node_detail = (f"bare zarr v3 array shape={z3.get('shape')} "
+                                  f"chunks={_parse_v3_array(z3)['chunks']} "
+                                  f"dtype={z3.get('data_type')}")
+                pm.attrs_raw = attrs
+                return pm
         else:
             pm.errors.append(f"no .zgroup ({e_zg}) and no zarr.json ({e_z3})")
             _classify_non_group(store, root, pm, (zg_result, z3_result))
